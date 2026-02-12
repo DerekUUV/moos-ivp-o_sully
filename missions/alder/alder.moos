@@ -106,6 +106,16 @@ ProcessConfig = pMarinePIDV22
   // Will set DESIRED_THRUST = DESIRED_SPEED * SPEED_FACTOR
   SPEED_FACTOR = 20
 }
+//-------
+
+ProcessConfig = pOdometry
+{
+AppTick=10
+CommsTick=20
+}
+
+
+
 
 //------------------------------------------
 // pMarineViewer config block
