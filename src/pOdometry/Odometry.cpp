@@ -24,6 +24,7 @@ Odometry::Odometry()
   m_previous_y=0;
   m_total_distance=0;
   m_distance_traveled=0;
+
 }
 
 //---------------------------------------------------------
@@ -94,28 +95,35 @@ bool Odometry::OnConnectToServer()
 bool Odometry::Iterate()
 {
   AppCastingMOOSApp::Iterate();
+ 
 
   // Below calculates differences, starting with initial 0 values
-  double xd = m_current_x - m_previous_x;
-  double yd = m_current_y - m_previous_y;
-  double delta = pow(pow(xd,2) + pow(yd,2),0.5);
 
-  if (delta > 20)
+
+
+  // If this is the first tick, it will set the preivous and current to be equal to facilitate when no longer first tick
+  if (m_first_reading)
     {
-      m_distance_traveled=0;
+      
+      m_distance_traveled = 0;
+      m_previous_x = m_current_x;
+      m_previous_y = m_current_y;
+      m_first_reading=false;
     }
+
+  // Now that no longer first reading, the x and ys are set to global coordinates (?) and will now 
   else
     {
-      m_distance_traveled=delta;
+      m_distance_traveled=m_total_distance;
+      double xd = m_current_x - m_previous_x;
+      double yd = m_current_y - m_previous_y;
+      m_distance_traveled = pow(pow(xd,2) + pow(yd,2),0.5);
+      m_total_distance= m_total_distance + m_distance_traveled;
+      m_previous_x = m_current_x;
+      m_previous_y = m_current_y;
     }
-  
-  // The Distance adds up on the loop, need an initial value for Distance
-	     
-   m_total_distance= m_total_distance + m_distance_traveled; 
 
-  // Updates a value for previous with the current ones to define for the next loop
-   m_previous_x = m_current_x;
-   m_previous_y = m_current_y;
+  
 
    Notify("ODOMETRY_DIST",m_total_distance);
   AppCastingMOOSApp::PostReport();
