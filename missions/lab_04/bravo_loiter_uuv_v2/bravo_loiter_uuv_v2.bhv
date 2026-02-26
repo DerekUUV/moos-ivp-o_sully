@@ -1,0 +1,175 @@
+//--------    FILE: bravo_loiter_dbl.bhv   -------------
+
+initialize  DEPLOY = false
+initialize  RETURN = false
+initialize  LOITER_REGION = west
+initialize  SUBMERGE = true
+
+
+//----------------------------------------------
+//LOITER BOXES
+//--WEST----------------------------------------
+Behavior = BHV_Loiter
+{
+    name         = loiter_west               
+    pwt          = 100       
+    condition = RETURN = false
+    condition = DEPLOY = true
+    condition = LOITER_REGION = west
+    endflag = LOITER_REGION = east
+    duration = 150
+    acquire_dist = 10                
+    capture_radius = 3                   
+    center_activate = false             
+    clockwise = false              
+    slip_radius = 15                            
+    spiral_factor = -2                
+    perpetual = true
+    duration_idle_decay = false
+    polygon = radial:: x=100,y=-75,radius=30,pts=8  // example
+    post_suffix = WEST                             // example
+    visual_hints = vertex_size  = 1              
+    visual_hints = edge_size    = 1              
+    visual_hints = vertex_color = dodger_blue    
+    visual_hints = edge_color   = white          
+    visual_hints = nextpt_color = yellow         
+    visual_hints = nextpt_lcolor = aqua          
+    visual_hints = nextpt_vertex_size = 5        
+    visual_hints = label        = west         
+  }
+//--EAST----------------------------------------
+Behavior = BHV_Loiter
+{
+    name         = loiter_east         
+    pwt          = 100                  
+    condition = RETURN = false
+    condition = DEPLOY = true
+    condition = LOITER_REGION = east
+    endflag = LOITER_REGION = west
+    duration = 150
+    acquire_dist = 10                
+    capture_radius = 3                   
+    center_activate = false             
+    clockwise = false              
+    slip_radius = 15                       
+    spiral_factor = -2              
+    duration = 150
+    perpetual = true
+    duration_idle_decay = false
+    polygon = radial:: x=160,y=-75,radius=20,pts=8  // example
+    post_suffix = HENRY                             // example
+    visual_hints = vertex_size  = 1             
+    visual_hints = edge_size    = 1              
+    visual_hints = vertex_color = dodger_blue    
+    visual_hints = edge_color   = white          
+    visual_hints = nextpt_color = yellow         
+    visual_hints = nextpt_lcolor = aqua          
+    visual_hints = nextpt_vertex_size = 5        
+    visual_hints = label        = east         // example    
+}
+//----------------------------------------------
+//MOVEMENT, GENERAL
+//----------------------------------------------
+Behavior=BHV_Waypoint
+{
+    name      = waypt_return
+    pwt       = 100
+    condition = RETURN = true
+    condition = DEPLOY = true
+    perpetual = true
+    updates   = RETURN_UPDATE
+    endflag   = RETURN = false
+    endflag   = DEPLOY = false
+    endflag   = MISSION = complete
+
+    speed = 2.0
+    capture_radius = 2.0
+    slip_radius = 8.0
+    points = 0,-20
+}
+//----------------------------------------------
+Behavior=BHV_ConstantSpeed
+{
+    name      = speed_constant
+    pwt       = 200
+    condition = DEPLOY = true
+    condition = SUBMERGE = true
+    perpetual = true
+    updates   = SPEED_UPDATE
+    speed = 2.5
+    duration = 10
+    duration_reset = CONST_SPD_RESET=true
+}
+//----------------------------------------------
+Behavior=BHV_ConstantSpeed
+{
+    name      = speed_surface
+    pwt       = 200
+    condition = DEPLOY = true
+    condition = SUBMERGE = false
+    perpetual = true
+    updates   = SPEED_UPDATE
+    speed = 0
+    duration = 10
+    duration_reset = CONST_SPD_RESET=true
+}
+//-----------------
+//DEPTH CONTROL
+//-----------------
+Behavior=BHV_ConstantDepth
+{
+    condition = LOITER_REGION = east
+    name         = depth_east  // example
+    pwt          = 100                 
+    updates      = CONST_DEP_UPDATES  // example
+    basewidth = 100           
+    depth = 10             
+    depth_mismatch_var = DEPTH_DIFF   // example
+    peakwidth = 3             
+    summitdelta = 50            
+    perpetual = true
+}
+
+//-----------------
+Behavior=BHV_ConstantDepth
+{
+    condition = LOITER_REGION = west
+    perpetual = true
+
+    name         = depth_west // example
+    pwt          = 100                 
+    updates      = CONST_DEP_UPDATES  // example
+    basewidth = 100           
+    depth = 30             
+    depth_mismatch_var = DEPTH_DIFF   // example
+    peakwidth = 3             
+    summitdelta = 50            
+}
+
+//-----------------
+//TIMER
+//-----------------
+ Behavior=BHV_Timer
+ {
+   name         = submerge_timer
+   perpetual    = true
+   pwt          = 100
+   duration     = 200
+   condition    = SUBMERGE=true    // example
+   condition    = DEPLOY = true
+   runflag      = SUBMERGE=true       // example
+   endflag      = SUBMERGE=false          // example
+ }
+
+  Behavior=BHV_Timer
+ {
+   name         = surface_timer
+   perpetual    = true
+   pwt          = 100
+   duration     = 60
+   condition    = SUBMERGE=false    // example
+   condition    = (NAV_DEPTH < 1) //1 meter to make mine MORE REAL WORLD
+   condition    = DEPLOY = true
+   runflag      = SUBMERGE=false       // example
+   endflag      = SUBMERGE=true          // example
+ }
