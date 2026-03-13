@@ -6,6 +6,7 @@ initialize  LOITER_REGION = west
 initialize  SUBMERGE = true
 
 
+
 //----------------------------------------------
 //LOITER BOXES
 //--WEST----------------------------------------
@@ -16,6 +17,7 @@ Behavior = BHV_Loiter
     condition = RETURN = false
     condition = DEPLOY = true
     condition = LOITER_REGION = west
+    condition = SUBMERGE = true
     endflag = LOITER_REGION = east
     duration = 150
     acquire_dist = 10                
@@ -26,6 +28,7 @@ Behavior = BHV_Loiter
     spiral_factor = -2                
     perpetual = true
     duration_idle_decay = false
+    //duration_reset = SUBMERGE = false
     polygon = radial:: x=100,y=-75,radius=30,pts=8  // example
     post_suffix = WEST                             // example
     visual_hints = vertex_size  = 1              
@@ -45,6 +48,7 @@ Behavior = BHV_Loiter
     condition = RETURN = false
     condition = DEPLOY = true
     condition = LOITER_REGION = east
+    condition = SUBMERGE = true
     endflag = LOITER_REGION = west
     duration = 150
     acquire_dist = 10                
@@ -56,6 +60,7 @@ Behavior = BHV_Loiter
     duration = 150
     perpetual = true
     duration_idle_decay = false
+    // duration_reset = SUBMERGE = false
     polygon = radial:: x=160,y=-75,radius=20,pts=8  // example
     post_suffix = HENRY                             // example
     visual_hints = vertex_size  = 1             
@@ -73,8 +78,8 @@ Behavior = BHV_Loiter
 Behavior=BHV_Waypoint
 {
     name      = waypt_return
+    condition = (ODOMETRY_DIST > 300) or (RETURN = true)
     pwt       = 100
-    condition = RETURN = true
     condition = DEPLOY = true
     perpetual = true
     updates   = RETURN_UPDATE
@@ -154,7 +159,7 @@ Behavior=BHV_ConstantDepth
    name         = submerge_timer
    perpetual    = true
    pwt          = 100
-   duration     = 200
+   duration     = 300
    condition    = SUBMERGE=true    // example
    condition    = DEPLOY = true
    runflag      = SUBMERGE=true       // example
