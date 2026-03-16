@@ -185,14 +185,14 @@ void Odometry::registerVariables()
 bool Odometry::buildReport() 
 {
   m_msgs << "============================================" << endl;
-  m_msgs << "File:                                       " << endl;
+  m_msgs << "Total Distance Traveled:" <<m_total_distance << "meters" << endl;
   m_msgs << "============================================" << endl;
 
   ACTable actab(4);
-  actab << "Alpha | Bravo | Charlie | Delta";
-  actab.addHeaderLines();
-  actab << "one" << "two" << "three" << "four";
-  m_msgs << actab.getFormattedString();
+  // actab << "Alpha | Bravo | Charlie | Delta";
+  //  actab.addHeaderLines();
+  //actab << "one" << "two" << "three" << "four";
+  //m_msgs << actab.getFormattedString();
 
   return(true);
 }
