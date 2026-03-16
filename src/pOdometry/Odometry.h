@@ -38,6 +38,7 @@ double m_previous_x;
 double m_previous_y;
 double m_total_distance;
 double m_distance_traveled;
+double m_current_depth;
 };
 
 #endif 

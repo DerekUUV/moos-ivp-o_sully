@@ -24,6 +24,7 @@ Odometry::Odometry()
   m_previous_y=0;
   m_total_distance=0;
   m_distance_traveled=0;
+  m_current_depth=0;
 
 }
 
@@ -69,13 +70,16 @@ bool Odometry::OnNewMail(MOOSMSG_LIST &NewMail)
      else if(key == "NAV_Y")
        m_current_y = msg.GetDouble();
 
+     else if(key == "NAV_DEPTH")
+       m_current_depth = msg.GetDouble();
+
 
          
      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
        reportRunWarning("Unhandled Mail: " + key);
 
    }
-	
+  
    return(true);
 }
 
@@ -114,6 +118,8 @@ bool Odometry::Iterate()
   // Now that no longer first reading, the x and ys are set to global coordinates (?) and will now 
   else
     {
+      if(m_current_depth > 25)
+      {
       m_distance_traveled=m_total_distance;
       double xd = m_current_x - m_previous_x;
       double yd = m_current_y - m_previous_y;
@@ -121,6 +127,11 @@ bool Odometry::Iterate()
       m_total_distance= m_total_distance + m_distance_traveled;
       m_previous_x = m_current_x;
       m_previous_y = m_current_y;
+      }
+      else
+      {
+      m_distance_traveled = 0;
+      }
     }
 
   
@@ -163,7 +174,7 @@ bool Odometry::OnStartUp()
 
   }
   
-  registerVariables();	
+  registerVariables();  
   return(true);
 }
 
@@ -175,6 +186,7 @@ void Odometry::registerVariables()
   AppCastingMOOSApp::RegisterVariables();
   Register("NAV_X",0);
   Register("NAV_Y",0);
+  Register("NAV_DEPTH",0);
   
 }
 
@@ -185,7 +197,8 @@ void Odometry::registerVariables()
 bool Odometry::buildReport() 
 {
   m_msgs << "============================================" << endl;
-  m_msgs << "Total Distance Traveled:" <<m_total_distance << "meters" << endl;
+  m_msgs << "Total Distance Traveled: " <<m_total_distance << " meters" << endl;
+  m_msgs << "current depth: " <<m_current_depth << " meters" << endl;
   m_msgs << "============================================" << endl;
 
   ACTable actab(4);
@@ -196,6 +209,7 @@ bool Odometry::buildReport()
 
   return(true);
 }
+
 
 
 
