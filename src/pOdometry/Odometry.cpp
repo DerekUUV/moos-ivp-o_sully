@@ -1,0 +1,216 @@
+/************************************************************/
+/*    NAME: Dereks Third Attempt                                              */
+/*    ORGN: MIT, Cambridge MA                               */
+/*    FILE: Odometry.cpp                                        */
+/*    DATE: December 29th, 1963                             */
+/************************************************************/
+
+#include <iterator>
+#include "MBUtils.h"
+#include "ACTable.h"
+#include "Odometry.h"
+
+using namespace std;
+
+//---------------------------------------------------------
+// Constructor()
+
+Odometry::Odometry()
+{
+  m_first_reading= true;
+  m_current_x=0;
+  m_current_y=0;
+  m_previous_x=0;
+  m_previous_y=0;
+  m_total_distance=0;
+  m_distance_traveled=0;
+  m_current_depth=0;
+
+}
+
+//---------------------------------------------------------
+// Destructor
+
+Odometry::~Odometry()
+{
+}
+
+//---------------------------------------------------------
+// Procedure: OnNewMail()
+
+bool Odometry::OnNewMail(MOOSMSG_LIST &NewMail)
+{
+  AppCastingMOOSApp::OnNewMail(NewMail);
+
+  MOOSMSG_LIST::iterator p;
+  for(p=NewMail.begin(); p!=NewMail.end(); p++) {
+    CMOOSMsg &msg = *p;
+    string key    = msg.GetKey();
+    
+#if 0 // Keep these around just for template
+    string comm  = msg.GetCommunity();
+    double dval  = msg.GetDouble();
+    string sval  = msg.GetString(); 
+    string msrc  = msg.GetSource();
+    double mtime = msg.GetTime();
+    bool   mdbl  = msg.IsDouble();
+    bool   mstr  = msg.IsString();
+
+    
+#endif
+
+     if(key == "FOO") 
+       cout << "great!";
+
+
+
+     if(key == "NAV_X")
+       m_current_x = msg.GetDouble();
+     
+     else if(key == "NAV_Y")
+       m_current_y = msg.GetDouble();
+
+     else if(key == "NAV_DEPTH")
+       m_current_depth = msg.GetDouble();
+
+
+         
+     else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
+       reportRunWarning("Unhandled Mail: " + key);
+
+   }
+  
+   return(true);
+}
+
+//---------------------------------------------------------
+// Procedure: OnConnectToServer()
+
+bool Odometry::OnConnectToServer()
+{
+   registerVariables();
+   return(true);
+}
+
+//---------------------------------------------------------
+// Procedure: Iterate()
+//            happens AppTick times per second
+
+bool Odometry::Iterate()
+{
+  AppCastingMOOSApp::Iterate();
+ 
+
+  // Below calculates differences, starting with initial 0 values
+
+
+
+  // If this is the first tick, it will set the preivous and current to be equal to facilitate when no longer first tick
+  if (m_first_reading)
+    {
+      
+      m_distance_traveled = 0;
+      m_previous_x = m_current_x;
+      m_previous_y = m_current_y;
+      m_first_reading=false;
+    }
+
+  // Now that no longer first reading, the x and ys are set to global coordinates (?) and will now 
+  else
+    {
+      if(m_current_depth > 25)
+      {
+      m_distance_traveled=m_total_distance;
+      double xd = m_current_x - m_previous_x;
+      double yd = m_current_y - m_previous_y;
+      m_distance_traveled = pow(pow(xd,2) + pow(yd,2),0.5);
+      m_total_distance= m_total_distance + m_distance_traveled;
+      m_previous_x = m_current_x;
+      m_previous_y = m_current_y;
+      }
+      else
+      {
+      m_distance_traveled = 0;
+      }
+    }
+
+  
+
+   Notify("ODOMETRY_DIST",m_total_distance);
+  AppCastingMOOSApp::PostReport();
+  return(true);
+}
+
+//---------------------------------------------------------
+// Procedure: OnStartUp()
+//            happens before connection is open
+
+bool Odometry::OnStartUp()
+{
+  AppCastingMOOSApp::OnStartUp();
+
+  STRING_LIST sParams;
+  m_MissionReader.EnableVerbatimQuoting(false);
+  if(!m_MissionReader.GetConfiguration(GetAppName(), sParams))
+    reportConfigWarning("No config block found for " + GetAppName());
+
+  STRING_LIST::iterator p;
+  for(p=sParams.begin(); p!=sParams.end(); p++) {
+    string orig  = *p;
+    string line  = *p;
+    string param = tolower(biteStringX(line, '='));
+    string value = line;
+
+    bool handled = false;
+    if(param == "foo") {
+      handled = true;
+    }
+    else if(param == "bar") {
+      handled = true;
+    }
+
+    if(!handled)
+      reportUnhandledConfigWarning(orig);
+
+  }
+  
+  registerVariables();  
+  return(true);
+}
+
+//---------------------------------------------------------
+// Procedure: registerVariables()
+
+void Odometry::registerVariables()
+{
+  AppCastingMOOSApp::RegisterVariables();
+  Register("NAV_X",0);
+  Register("NAV_Y",0);
+  Register("NAV_DEPTH",0);
+  
+}
+
+
+//------------------------------------------------------------
+// Procedure: buildReport()
+
+bool Odometry::buildReport() 
+{
+  m_msgs << "============================================" << endl;
+  m_msgs << "Total Distance Traveled: " <<m_total_distance << " meters" << endl;
+  m_msgs << "current depth: " <<m_current_depth << " meters" << endl;
+  m_msgs << "============================================" << endl;
+
+  ACTable actab(4);
+  // actab << "Alpha | Bravo | Charlie | Delta";
+  //  actab.addHeaderLines();
+  //actab << "one" << "two" << "three" << "four";
+  //m_msgs << actab.getFormattedString();
+
+  return(true);
+}
+
+
+
+
+

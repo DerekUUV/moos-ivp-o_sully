@@ -1,8 +1,8 @@
 /************************************************************/
-/*    NAME: DerekOSullivan                                              */
+/*    NAME: DerekOSullivan                                  */
 /*    ORGN: MIT, Cambridge MA                               */
-/*    FILE: PointAssign.h                                          */
-/*    DATE: December 29th, 1963                             */
+/*    FILE: PointAssign.h                                   */
+/*    DATE: 10mar26                                         */
 /************************************************************/
 
 #ifndef PointAssign_HEADER
@@ -10,7 +10,8 @@
 
 #include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
 #include "XYPoint.h"
-#include <map>
+#include <vector>
+#include <string>
 
 class PointAssign : public AppCastingMOOSApp
 {
@@ -31,15 +32,17 @@ protected:
   void registerVariables();
   void postViewPoint(double x, double y, std::string label, std::string color);
 
-private: // Configuration variables
-  std::vector<XYPoint> m_vector_points;
-  std::vector<std::string> m_vector_vehicles;
-
 private: // State variables
-  bool   assign_by_region;
-  bool   m_points_assigned;
-  double m_median_x;
-  std::map<std::string, int> m_map_vehicle_count;
+  bool   m_assign_by_region;
+  int    m_next_index;
+  double m_mid_x;
+  bool   m_mid_x_computed;
+  bool   m_timer_started;
+  bool   m_henry_ready;
+  bool   m_gilda_ready;
+
+  std::vector<std::string> m_vnames;
+  std::vector<std::string> m_visit_points;
 };
 
 #endif
