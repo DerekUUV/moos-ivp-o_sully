@@ -10,6 +10,7 @@
 
 #include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
 #include "XYPoint.h"
+#include <map>
 #include <vector>
 #include <string>
 
@@ -38,8 +39,7 @@ private: // State variables
   double m_mid_x;
   bool   m_mid_x_computed;
   bool   m_timer_started;
-  bool   m_henry_ready;
-  bool   m_gilda_ready;
+  std::map<std::string, bool> m_ready;
 
   std::vector<std::string> m_vnames;
   std::vector<std::string> m_visit_points;

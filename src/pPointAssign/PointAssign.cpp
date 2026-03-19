@@ -17,16 +17,12 @@ using namespace std;
 
 PointAssign::PointAssign()
 {
-  m_assign_by_region = true;  // hard coded for now, can be set in .moos config
+  m_assign_by_region = true;  // hard coded for now might add as button
   m_next_index       = 0;     // tracks which vehicle gets the next point (round-robin)
   m_mid_x            = 0;     // default the value, pre-fill to zero
   m_mid_x_computed   = false; // status on computing mid before divying up points
   m_timer_started    = false; // tracks if timer has been unpaused already
-  m_henry_ready      = false; // hard code for name
-  m_gilda_ready      = false; // hard code for name
-
-  m_vnames.push_back("henry"); // add vehicles to the list
-  m_vnames.push_back("gilda");
+  // vehicle names and ready states are loaded from the .moos config block
 }
 
 //---------------------------------------------------------
@@ -39,8 +35,6 @@ PointAssign::~PointAssign()
 
 //---------------------------------------------------------
 // Procedure: OnNewMail()
-//   Receives VISIT_POINT messages from uTimerScript and
-//   NODE_REPORT messages to know when vehicles are connected
 
 bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
 {
@@ -52,17 +46,15 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     string key = msg.GetKey();
 
     if(key == "VISIT_POINT") {
-      m_visit_points.push_back(msg.GetString()); // store raw point strings for processing in Iterate()
+      m_visit_points.push_back(msg.GetString()); // store raw point info for processing
     }
 
     if(key == "NODE_REPORT") {
       string sval = msg.GetString();
-      string name = tokStringParse(sval, "NAME", ',', '='); // pull vehicle name out of the report
+      string name = tokStringParse(sval, "NAME", ',', '='); // reads name to deleniate (sp)
 
-      if(name == "henry")
-        m_henry_ready = true; // henry has connected
-      if(name == "gilda")
-        m_gilda_ready = true; // gilda has connected
+      if(m_ready.count(name))
+        m_ready[name] = true; // mark this vehicle as alive
     }
   }
 
@@ -86,52 +78,56 @@ bool PointAssign::Iterate()
 {
   AppCastingMOOSApp::Iterate();
 
-  // wait until both vehicles have sent a node report before starting the timer
-  if(!m_timer_started && m_henry_ready && m_gilda_ready) {
-    Notify("UTIMER_PAUSE", "false"); // unpause timer so points start
-    m_timer_started = true;
+  // wait until all configured vehicles are up before unpausing timer
+  bool all_ready = !m_ready.empty();
+  for(map<string,bool>::iterator it=m_ready.begin(); it!=m_ready.end(); ++it)
+    if(!it->second) { all_ready = false; break; }
+
+  if(!m_timer_started && all_ready) {
+    Notify("UTIMER_PAUSE", "false"); // ready set
+    m_timer_started = true; // go
   }
 
-  // compute the mid line before distributing points
+  // computing of the mid line before distributing points bc fancy
 
-  if(m_assign_by_region && !m_mid_x_computed) {
+  if(m_assign_by_region && !m_mid_x_computed) { //region yes but no mid computed
     bool has_lastpoint = false; // check the full batch has arrived before computing
-    for(unsigned int j=0; j<m_visit_points.size(); j++) {
-      if(m_visit_points[j] == "lastpoint") { has_lastpoint = true; break; }
+    for(unsigned int j=0; j<m_visit_points.size(); j++) { // sequential walk through
+      if(m_visit_points[j] == "lastpoint") { has_lastpoint = true; break; } //if it is at last point STOP
     }
-    if(has_lastpoint) {
-      double sum   = 0;
+    if(has_lastpoint) { //this will now seek the final point
+      double sum   = 0; //does not care about last
       int    count = 0;
-      for(unsigned int j=0; j<m_visit_points.size(); j++) {
+      for(unsigned int j=0; j<m_visit_points.size(); j++) { //
         string sval = m_visit_points[j];
-        if(sval != "firstpoint" && sval != "lastpoint") {
+        if(sval != "firstpoint" && sval != "lastpoint") { //if not 1st/last
           string temp  = sval;
           string xpart = biteStringX(temp, ','); // pull the x=val token
-          biteStringX(xpart, '=');               // strip the "x=" prefix to get the number
+          biteStringX(xpart, '=');               // grabs actual x value
           double x = atof(xpart.c_str());
-          sum += x;
+          sum += x; //addinh
           count++;
         }
       }
       if(count > 0) {
         m_mid_x          = sum / (double)count; // average x is the dividing line
-        m_mid_x_computed = true;
+        m_mid_x_computed = true; //signals there is a middle point to use
       }
     }
   }
 
   // process every point buffered since last Iterate()
   for(unsigned int j=0; j<m_visit_points.size(); j++) {
-    string sval = m_visit_points[j];
+    string sval = m_visit_points[j]; //loop for pushing values
 
     if(sval == "firstpoint") {
       reportEvent("First point marker received");
-      m_next_index = 0; // reset round-robin index at the start of each batch
+      m_next_index = 0; // reset round-robin numba at the start of each batch
 
       // forward firstpoint to every vehicle so they know a batch is starting
       for(unsigned int i=0; i<m_vnames.size(); i++) {
-        string var = "VISIT_POINT_" + toupper(m_vnames[i]);
-        Notify(var, "firstpoint");
+        string var = "VISIT_POINT_" + toupper(m_vnames[i]); //assignment formatting to send to vic
+        Notify(var, "firstpoint"); //hey dawg (e.g. gilda) this is the first thang
       }
     }
     else if(sval == "lastpoint") {
@@ -140,11 +136,11 @@ bool PointAssign::Iterate()
       // forward lastpoint to every vehicle so they know the batch is done
       for(unsigned int i=0; i<m_vnames.size(); i++) {
         string var = "VISIT_POINT_" + toupper(m_vnames[i]);
-        Notify(var, "lastpoint");
+        Notify(var, "lastpoint"); // hey dawg (e.g. gilda) ya done
       }
     }
     else {
-      string vname; // name of the vehicle this point will be sent to
+      string vname; // stores data nicely to be sent out
       string temp   = sval;
       string xpart  = biteStringX(temp, ',');
       string ypart  = biteStringX(temp, ',');
@@ -160,30 +156,31 @@ bool PointAssign::Iterate()
       if(m_assign_by_region) {
         // split by x position relative to the computed mid x
         if(x < m_mid_x)
-          vname = m_vnames[0]; // left region goes to henry
+          vname = m_vnames[0]; // left region goes to second vehicle in list
         else
-          vname = m_vnames[1]; // right region goes to gilda
+          vname = m_vnames[1]; // right region goes to first vehicle in list hopefully the go nicely
       }
       else {
-        // round-robin: alternate points between vehicles
-        vname = m_vnames[m_next_index % m_vnames.size()];
-        m_next_index++;
+        // round-robin: alternate points between vehicles IF NOT REGIONED
+        vname = m_vnames[m_next_index % m_vnames.size()]; 
+        m_next_index++; //++ adds a sequencing
       }
 
       string var = "VISIT_POINT_" + toupper(vname); // build the per-vehicle variable name
       Notify(var, sval);                             // send point to that vehicle
 
-      // show the point on pMarineViewer in the vehicle's color
-      if(vname == "henry")
-        postViewPoint(x, y, idpart, "yellow");
-      else
-        postViewPoint(x, y, idpart, "cyan");
+      // show the point on pMarineViewer in the vehicle's color (cycles through list)
+      vector<string> colors = {"cyan", "yellow", "orange", "green", "red"};
+      int vidx = 0;
+      for(unsigned int i=0; i<m_vnames.size(); i++)
+        if(m_vnames[i] == vname) { vidx = i; break; }
+      postViewPoint(x, y, idpart, colors[vidx % colors.size()]);
 
-      reportEvent("Sent to " + var + ": " + sval);
+      reportEvent("Sent to " + var + ": " + sval); //info goes out to VEHICLE + x,y,id DATA
     }
   }
 
-  m_visit_points.clear(); // done processing this batch, clear for next Iterate()
+  m_visit_points.clear(); 
 
   AppCastingMOOSApp::PostReport();
   return(true);
@@ -191,7 +188,6 @@ bool PointAssign::Iterate()
 
 //---------------------------------------------------------
 // Procedure: OnStartUp()
-//   Reads config from .moos file, currently only assign_by_region
 
 bool PointAssign::OnStartUp()
 {
@@ -208,9 +204,17 @@ bool PointAssign::OnStartUp()
     string value = line;                   // remainder is the value
 
     if(param == "assign_by_region") {
-      m_assign_by_region = (value == "true"); // set assignment mode from config
+      m_assign_by_region = (value == "true"); // set assignment mode
+    }
+    else if(param == "v_name") {
+      string vname = tolower(value); // NODE_REPORT names are lowercase
+      m_vnames.push_back(vname);
+      m_ready[vname] = false;
     }
   }
+
+  if(m_vnames.empty())
+    reportConfigWarning("No v_name entries found — add v_name=<name> to config block");
 
   registerVariables();
   return(true);
@@ -248,12 +252,13 @@ void PointAssign::postViewPoint(double x, double y, string label, string color)
 
 bool PointAssign::buildReport()
 {
-  m_msgs << "Henry ready     : " << (m_henry_ready ? "YES" : "NO") << endl;
-  m_msgs << "Gilda ready     : " << (m_gilda_ready ? "YES" : "NO") << endl;
+  for(map<string,bool>::iterator it=m_ready.begin(); it!=m_ready.end(); ++it)
+    m_msgs << it->first << " ready: " << (it->second ? "YES" : "NO") << endl;
   m_msgs << "Timer started   : " << (m_timer_started ? "YES" : "NO") << endl;
   m_msgs << "Assign by region: " << (m_assign_by_region ? "YES" : "NO") << endl;
   m_msgs << "Mid X computed  : " << (m_mid_x_computed ? "YES" : "NO") << endl;
   m_msgs << "Mid X value     : " << m_mid_x << endl;
 
   return(true);
+
 }
