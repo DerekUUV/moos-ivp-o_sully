@@ -26,7 +26,7 @@ IP_ADDR="localhost"
 MOOS_PORT="9000"
 PSHARE_PORT="9200"
 
-VNAMES=""
+VNAME="shoreside"
 
 #------------------------------------------------------------ 
 #  Part 3: Check for and handle command-line arguments
@@ -114,7 +114,7 @@ if [ "${VERBOSE}" = "yes" ]; then
     echo "PSHARE_PORT =   [${PSHARE_PORT}]  "
     echo "LAUNCH_GUI =    [${LAUNCH_GUI}]   "
     echo "----------------------------------"
-    echo "VNAMES =        [${VNAMES}]       "
+    echo "VNAMES =        [${VNAME}]       "
     echo "----------------------------------"
     echo -n "Hit any key to continue launch "
     read ANSWER
@@ -132,7 +132,8 @@ fi
 nsplug meta_shoreside.moos targ_shoreside.moos $NSFLAGS WARP=$TIME_WARP \
        IP_ADDR=$IP_ADDR             MOOS_PORT=$MOOS_PORT    \
        PSHARE_PORT=$PSHARE_PORT     LAUNCH_GUI=$LAUNCH_GUI  \
-       VNAMES=$VNAMES                                       \
+       VNAME=$VNAME                                       \
+       
 
 if [ "${JUST_MAKE}" = "yes" ]; then
     echo "$ME: Targ files made; exiting without launch."
