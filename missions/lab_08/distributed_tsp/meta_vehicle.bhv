@@ -46,6 +46,7 @@ Behavior = BHV_Waypoint
   pwt       = 100
   condition = MODE==RETURNING
   endflag   = STATION_KEEP = true
+  endflag   = GENPATH_REGENERATE = true
   perpetual = true
 
       speed = 1.3
@@ -72,6 +73,22 @@ Behavior = BHV_StationKeep
 }
 
 //----------------------------------------------
+Behavior = BHV_StationKeep
+{
+  name      = station_keep_waiting
+  pwt       = 100
+  condition = MODE==LOITERING
+
+   center_activate = true
+      inner_radius = 5
+      outer_radius = 10
+       outer_speed = 1.0
+     transit_speed = 1.3
+        swing_time = 7
+      visual_hints = vertex_size=0, edge_color=gray50
+}
+
+//----------------------------------------------
 // TSP Path Traversal
 //----------------------------------------------
 Behavior = BHV_Waypoint
@@ -80,22 +97,25 @@ Behavior = BHV_Waypoint
   pwt       = 100
   condition = MODE==TRAVERSING
   perpetual = true
+
   endflag   = TRAVERSE = false
-  endflag   = RETURN = true
+  endflag   = LOITER   = false
+  endflag   = RETURN   = true
 
   updates   = GENPATH_UPDATES
       speed = 1.3
      radius = 5.0
-  nm_radius = 15.0
+  nm_radius = 1.0
      points = 0,-500
        lead = 8
+
   visual_hints = nextpt_color=yellow, nextpt_lcolor=white
   visual_hints = edge_color=cyan, vertex_color=cyan
   visual_hints = edge_size=1, vertex_size=3
 }
 
 //----------------------------------------------
-// ADDITIONS BELOW (from lab_06 refuel mission)
+// ADDITIONS BELOW (for lab_06 refuel mission)
 //----------------------------------------------
 Behavior = BHV_Waypoint
 {
@@ -145,7 +165,6 @@ Behavior = BHV_Timer
   name  = thirsty_vehicle_timer
   pwt   = 99
   condition = (MODE==LOITERING) or (MODE==TRAVERSING)
-  condition = STATION_KEEP = false
 
   duration = 150
   perpetual = true

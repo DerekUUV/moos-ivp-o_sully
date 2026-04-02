@@ -19,13 +19,16 @@ using namespace std;
 
 GenPath::GenPath()
 {
-  m_receiving       = false;
-  m_points_received = false;
-  m_path_posted     = false;
-  m_traverse_posted = false;
-  m_nav_x           = 0;
-  m_nav_y           = 0;
-  m_vname           = "";
+  m_receiving          = false;
+  m_points_received    = false;
+  m_path_posted        = false;
+  m_traverse_posted    = false;
+  m_traverse_active    = false;
+  m_replan_requested   = false;
+  m_visit_radius       = 3; //visit radius for what counts as a hit
+  m_nav_x              = 0; //start value
+  m_nav_y              = 0; //"" 
+  m_vname              = "";
 }
 
 //---------------------------------------------------------
@@ -78,6 +81,10 @@ bool GenPath::OnNewMail(MOOSMSG_LIST &NewMail)
         m_vector_points.push_back(pt);
       }
     }
+    else if (key == "GENPATH_REGENERATE")
+    {
+      m_replan_requested = true;
+    }
     else if (key != "APPCAST_REQ")
       reportRunWarning("Unhandled Mail: " + key);
   }
@@ -104,17 +111,52 @@ bool GenPath::Iterate()
   if (m_points_received && !m_path_posted)
   {
     if (!m_vector_points.empty()) {
-      XYSegList seglist = buildGreedyPath();
+      XYSegList seglist = buildGreedyPath(m_vector_points);
       string update_str = "points = " + seglist.get_spec();
       Notify("GENPATH_UPDATES", update_str);
-      Notify("GENPATH_SEGLIST", seglist.get_spec());  // for pMarineViewer
+      Notify("GENPATH_SEGLIST", seglist.get_spec());
+      m_missed_points = m_vector_points;  // all points start as unvisited
     }
-    Notify("TRAVERSE", "true");  // always signal done, even if no points assigned
+    Notify("TRAVERSE", "true");
     m_path_posted = true;
   }
 
+  // Proximity check: remove any missed point the vehicle has passed within radius
+  if (m_path_posted && !m_missed_points.empty())
+  {
+    vector<XYPoint> still_missed;
+    for (unsigned int i = 0; i < m_missed_points.size(); i++)
+    {
+      double dist = hypot(m_missed_points[i].x() - m_nav_x, m_missed_points[i].y() - m_nav_y);
+      if (dist > m_visit_radius)
+        still_missed.push_back(m_missed_points[i]);
+    }
+    m_missed_points = still_missed;
+  }
+
+  // Replan: triggered by GENPATH_REGENERATE from the helm after each return
+  if (m_replan_requested)
+  {
+    m_replan_requested = false;
+    if (!m_missed_points.empty()) {
+      XYSegList seglist = buildGreedyPath(m_missed_points);
+      string update_str = "points = " + seglist.get_spec();
+      Notify("GENPATH_UPDATES", update_str);
+      Notify("GENPATH_SEGLIST", seglist.get_spec());
+      Notify("STATION_KEEP", "false");
+      Notify("RETURN", "false");
+      Notify("TRAVERSE", "true");
+    }
+  }
+
+
+
+
+
+
   AppCastingMOOSApp::PostReport();
   return (true);
+  
 }
 
 //---------------------------------------------------------
@@ -140,7 +182,11 @@ bool GenPath::OnStartUp()
     bool handled = false;
 
     if (param == "v_name") {
-      m_vname = value;  // vehicle name, used to subscribe to VISIT_POINT_{VNAME}
+      m_vname = value;
+      handled = true;
+    }
+    else if (param == "visit_radius") {
+      m_visit_radius = atof(value.c_str());
       handled = true;
     }
 
@@ -161,16 +207,17 @@ void GenPath::registerVariables()
   Register("VISIT_POINT", 0);
   Register("NAV_X",       0);
   Register("NAV_Y",       0);
+  Register("GENPATH_REGENERATE", 0);
 }
 
 //---------------------------------------------------------
 // Procedure: buildGreedyPath()
 //   Greedy nearest-neighbor tour starting from current position
 
-XYSegList GenPath::buildGreedyPath()
+XYSegList GenPath::buildGreedyPath(vector<XYPoint> points)
 {
   XYSegList seglist;
-  vector<XYPoint> remaining = m_vector_points;
+  vector<XYPoint> remaining = points;
 
   double cx = m_nav_x;
   double cy = m_nav_y;
@@ -212,9 +259,12 @@ bool GenPath::buildReport()
 
   m_msgs << "Nav position : (" << m_nav_x << ", " << m_nav_y << ")" << endl;
   m_msgs << "Points received: " << m_vector_points.size() << endl;
+  m_msgs << "Missed points  : " << m_missed_points.size() << endl;
+  m_msgs << "Visit radius   : " << m_visit_radius << "m" << endl;
   m_msgs << "Receiving      : " << (m_receiving ? "YES" : "NO") << endl;
   m_msgs << "All received   : " << (m_points_received ? "YES" : "NO") << endl;
   m_msgs << "Path posted    : " << (m_path_posted ? "YES" : "NO") << endl;
+  m_msgs << "Replan pending : " << (m_replan_requested ? "YES" : "NO") << endl;
 
   m_msgs << endl;
   m_msgs << "-- Assigned Points --" << endl;
