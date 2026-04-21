@@ -1,0 +1,6 @@
+                    score1=5, score2=0, dur=172.5, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[MALT-CLAY], mhash_lshort=P-MALT-CLAY, mhash=mhash=260416-1056P-MALT-CLAY,utc=1776351368.85
+  score1=5, score2=0, dur=173, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[WISE-COIL], mhash_lshort=T-WISE-COIL, mhash=mhash=260416-1112T-WISE-COIL,utc=1776352343.82
+  score1=1, score2=0, dur=950.3, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[LAZY-NOTE], mhash_lshort=C-LAZY-NOTE, mhash=mhash=260416-1114C-LAZY-NOTE,utc=1776352440.50
+    score1=5, score2=0, dur=154.9, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[PAST-POLK], mhash_lshort=W-PAST-POLK, mhash=mhash=260416-1123W-PAST-POLK,utc=1776352998.55
+  score1=15, score2=0, dur=254.3, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[POOR-KEEP], mhash_lshort=Q-POOR-KEEP, mhash=mhash=260416-1125Q-POOR-KEEP,utc=1776353137.76
+      score1=13, score2=0, dur=22.4, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[HOLY-HOYT], mhash_lshort=N-HOLY-HOYT, mhash=mhash=260421-1114N-HOLY-HOYT,utc=1776784481.70
