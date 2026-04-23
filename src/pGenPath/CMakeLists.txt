@@ -14,8 +14,7 @@ ADD_EXECUTABLE(pGenPath ${SRC})
 TARGET_LINK_LIBRARIES(pGenPath
    ${MOOS_LIBRARIES}
    apputil
-   mbutil
    m
    geometry
-   color
+   mbutil
    pthread)
