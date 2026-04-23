@@ -17,4 +17,5 @@ TARGET_LINK_LIBRARIES(pGenPath
    mbutil
    m
    geometry
+   color
    pthread)

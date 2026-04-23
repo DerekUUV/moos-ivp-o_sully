@@ -17,4 +17,5 @@ TARGET_LINK_LIBRARIES(pGenRescue
    mbutil
    m
    geometry
+   color
    pthread)

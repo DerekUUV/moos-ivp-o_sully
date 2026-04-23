@@ -17,5 +17,6 @@ TARGET_LINK_LIBRARIES(pPointAssign
    mbutil
    m
    geometry
+   color
    pthread)
 
