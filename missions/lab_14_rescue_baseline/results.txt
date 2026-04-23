@@ -4,3 +4,4 @@
     score1=5, score2=0, dur=154.9, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[PAST-POLK], mhash_lshort=W-PAST-POLK, mhash=mhash=260416-1123W-PAST-POLK,utc=1776352998.55
   score1=15, score2=0, dur=254.3, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[POOR-KEEP], mhash_lshort=Q-POOR-KEEP, mhash=mhash=260416-1125Q-POOR-KEEP,utc=1776353137.76
       score1=13, score2=0, dur=22.4, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[HOLY-HOYT], mhash_lshort=N-HOLY-HOYT, mhash=mhash=260421-1114N-HOLY-HOYT,utc=1776784481.70
+  score1=12, score2=0, dur=304.5, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[WAVY-TURN], mhash_lshort=H-WAVY-TURN, mhash=mhash=260423-1031H-WAVY-TURN,utc=1776954706.10

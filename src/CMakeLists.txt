@@ -29,4 +29,4 @@ if(APPLE)
     set(MBUTIL_LINK mbutil)
 else()
     set(MBUTIL_LINK -Wl, --whole-archive mbutil -Wl, --no-whole-archive)
-endif
+endif()
