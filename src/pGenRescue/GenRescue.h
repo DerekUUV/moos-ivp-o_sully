@@ -36,7 +36,14 @@ protected:
   void handleSwimmerAlert(const std::string& val);
   void handleFoundSwimmer(const std::string& val);
   void postUpdatedPath();
-  XYSegList buildGreedyPath(std::vector<XYPoint> points);
+  XYSegList buildGreedyPath(std::vector<XYPoint> points, double cx, double cy);
+  XYSegList buildGreedyPath(std::vector<XYPoint> points); // starts from m_nav_x/y
+
+private:
+  void      handleNodeReport(const std::string& val);
+  XYPoint   selectPinkyTarget();
+  std::string selectClusterDenialTarget();
+  XYSegList buildAdversarialPath(XYPoint first);
 
 private: // State variables
   std::map<std::string, XYPoint> m_swimmers;    // id -> position (unrescued)
@@ -46,6 +53,18 @@ private: // State variables
   double      m_nav_y;
   std::string m_vname;
   double      m_visit_radius; // meters - within this counts as visited
+
+  // Adversarial heuristics
+  std::string m_heuristic;        // "greedy", "pinky", "secondstring", "clusterdenial"
+  std::string m_tmate;            // opponent vehicle name to track
+  double      m_lookahead_dist;   // meters ahead of opponent to project (pinky only)
+  double      m_cluster_radius;   // neighbourhood radius for cluster scoring
+  double      m_opp_x, m_opp_y, m_opp_hdg;
+  bool        m_opp_known;
+
+  // Committed first target (secondstring and clusterdenial)
+  std::string m_committed_id;
+  bool        m_has_committed_target;
 };
 
 #endif

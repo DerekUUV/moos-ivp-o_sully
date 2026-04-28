@@ -63,18 +63,18 @@ Behavior = BHV_Waypoint
 
           repeat = 0
            speed = 1.2
-  capture_radius = 3.0 
+  capture_radius = 3.0
     capture_line = true
      slip_radius = 8.0
           points = 41,-25:64,-41:28,-60:50,-92:5,-100
 
 	crs_spd_zaic_ratio = 85
-	
+
      visual_hints = vertex_size  = 4             // default
      visual_hints = vertex_color = dodger_blue   // default
      visual_hints = edge_size = 1
 
-  visual_hints = edge_color = $(COLOR) 
+  visual_hints = edge_color = $(COLOR)
 }
 
 //----------------------------------------------

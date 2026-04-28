@@ -74,11 +74,15 @@ ProcessConfig = pHelmIvP
 // pGenRescue config block
 
 ProcessConfig = pGenRescue
- 
 {
   AppTick   = 4
   CommsTick = 4
   v_name    = $(VNAME)
+
+#ifdef VNAME ben
+  heuristic      = clusterdenial
+  cluster_radius = 50
+#endif
 }
 
 //------------------------------------------

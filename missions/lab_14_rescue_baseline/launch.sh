@@ -244,8 +244,10 @@ fi
 #-------------------------------------------------------------
 # Part 6: Launch the vehicles
 #-------------------------------------------------------------
+REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 VARGS=" --sim --auto --max_spd=$MAX_SPD $MMOD "
 VARGS+=" $TIME_WARP $JUST_MAKE $VERBOSE "
+VARGS+=" --pgr=${REPO_DIR}/bin/pGenRescue "
 LOGLINE=""
 for IX in `seq 1 $VAMT`;
 do

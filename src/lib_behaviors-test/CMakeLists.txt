@@ -77,3 +77,19 @@ TARGET_LINK_LIBRARIES(BHV_ZigLeg
    mbutil
    geometry
    ${SYSTEM_LIBS} )
+
+#--------------------------------------------------------
+#                                      BHV_Pinky
+#--------------------------------------------------------
+ADD_LIBRARY(BHV_Pinky SHARED
+   BHV_Pinky.cpp)
+TARGET_LINK_LIBRARIES(BHV_Pinky
+   helmivp
+   behaviors
+   ivpbuild
+   logic
+   ivpcore
+   bhvutil
+   mbutil
+   geometry
+   ${SYSTEM_LIBS} )
