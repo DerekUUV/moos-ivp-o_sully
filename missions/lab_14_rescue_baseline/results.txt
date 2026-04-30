@@ -22,3 +22,6 @@
   score1=9, score2=6, dur=153.7, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[HARD-SCAN], mhash_lshort=U-HARD-SCAN, mhash=mhash=260428-1055U-HARD-SCAN,utc=1777388140.87
   score1=8, score2=7, dur=197, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[SLIM-TYPE], mhash_lshort=K-SLIM-TYPE, mhash=mhash=260428-1056K-SLIM-TYPE,utc=1777388170.41
       score1=8, score2=7, dur=176.6, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[GAMY-ZEUS], mhash_lshort=Y-GAMY-ZEUS, mhash=mhash=260428-1058Y-GAMY-ZEUS,utc=1777388314.63
+  score1=9, score2=6, dur=180, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[VICE-IMAC], mhash_lshort=Z-VICE-IMAC, mhash=mhash=260428-1100Z-VICE-IMAC,utc=1777388415.63
+      score1=8, score2=7, dur=147.4, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[FINE-CODE], mhash_lshort=Q-FINE-CODE, mhash=mhash=260430-0949Q-FINE-CODE,utc=1777556985.91
+  score1=8, score2=7, dur=149.9, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[DANK-RUSS], mhash_lshort=T-DANK-RUSS, mhash=mhash=260430-0951T-DANK-RUSS,utc=1777557073.86
