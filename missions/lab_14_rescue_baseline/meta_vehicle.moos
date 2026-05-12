@@ -66,6 +66,7 @@ ProcessConfig = pHelmIvP
   hold_on_app = pContactMgrV20
 
 	ivp_behavior_dir = $(BHV_DIR)
+	ivp_behavior_dir = /Users/UUV/moos-ivp-o_sully/lib
 	
 	goals_mandatory = true	
 }

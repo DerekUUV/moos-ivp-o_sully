@@ -47,12 +47,21 @@ Behavior = BHV_Scout
 	
 //----------------------------------------------
 #ifdef VROLE rescue
-Behavior = BHV_Waypoint
+Behavior = BHV_Pinky
+{
+  name       = pinky
+  pwt        = 100
+  updates    = SURVEY_UPDATE
+  condition  = MODE==SURVEYING
+  perpetual  = true
+
+  capture_radius = 5.0
+  desired_speed  = 1.2
+  tmate          = $(TMATE)
+  op_region      = pts={60,10:-75.54,-54.26:-36.99,-135.58:98.55,-71.32}
+}
 #elseifdef VROLE fixed
 Behavior = BHV_Waypoint
-#else
-//Behavior = BHV_Waypoint
-#endif
 {
   name       = waypt_survey
   pwt        = 100
@@ -76,6 +85,7 @@ Behavior = BHV_Waypoint
 
   visual_hints = edge_color = $(COLOR)
 }
+#endif
 
 //----------------------------------------------
 Behavior = BHV_StationKeep

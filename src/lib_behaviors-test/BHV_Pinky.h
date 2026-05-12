@@ -10,9 +10,11 @@
 
 #include <map>
 #include <set>
+#include <vector>
 #include <string>
 #include "IvPBehavior.h"
 #include "XYPoint.h"
+#include "XYPolygon.h"
 
 class BHV_Pinky : public IvPBehavior {
 public:
@@ -26,6 +28,8 @@ public:
 
 protected:
   void         selectTarget();
+  void         selectExploreTarget();
+  void         buildExploreGrid();
   IvPFunction* buildFunction();
   void         postViewPoint(bool viewable=true);
   void         postLookaheadPoint(bool viewable=true);
@@ -38,6 +42,8 @@ protected: // Config
   double      m_lookahead_dist;
   double      m_capture_radius;
   double      m_desired_speed;
+  double      m_serpentine_amp;
+  double      m_serpentine_period;
 
 protected: // Own state
   double m_osx, m_osy;
@@ -55,6 +61,15 @@ protected: // Current target
   double      m_ptx, m_pty;
   bool        m_pt_set;
   std::string m_target_id;
+
+protected: // Exploration
+  std::vector<XYPoint> m_explore_pts;
+  std::set<int>        m_visited_regions;
+  int                  m_explore_idx;
+  bool                 m_explore_mode;
+  bool                 m_explore_pts_from_config;
+  XYPolygon            m_op_region;
+  bool                 m_op_region_set;
 };
 
 #define IVP_EXPORT_FUNCTION

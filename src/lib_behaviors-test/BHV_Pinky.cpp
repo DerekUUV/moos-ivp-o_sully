@@ -12,6 +12,7 @@
 #include "BuildUtils.h"
 #include "ZAIC_PEAK.h"
 #include "OF_Coupler.h"
+#include "XYFormatUtilsPoly.h"
 
 using namespace std;
 
@@ -27,6 +28,8 @@ BHV_Pinky::BHV_Pinky(IvPDomain gdomain) : IvPBehavior(gdomain)
   m_lookahead_dist = 20.0;
   m_capture_radius = 5.0;
   m_desired_speed  = 1.2;
+  m_serpentine_amp    = 60.0;
+  m_serpentine_period = 10.0;
 
   m_osx = 0; m_osy = 0;
 
@@ -36,6 +39,11 @@ BHV_Pinky::BHV_Pinky(IvPDomain gdomain) : IvPBehavior(gdomain)
 
   m_ptx = 0; m_pty = 0;
   m_pt_set = false;
+
+  m_explore_mode            = false;
+  m_explore_idx             = -1;
+  m_explore_pts_from_config = false;
+  m_op_region_set           = false;
 
   addInfoVars("NAV_X, NAV_Y");
   addInfoVars("NODE_REPORT");
@@ -58,6 +66,31 @@ bool BHV_Pinky::setParam(string param, string val)
     return setPosDoubleOnString(m_capture_radius, val);
   else if(param == "desired_speed")
     return setPosDoubleOnString(m_desired_speed, val);
+  else if(param == "serpentine_amp")
+    return setPosDoubleOnString(m_serpentine_amp, val);
+  else if(param == "serpentine_period")
+    return setPosDoubleOnString(m_serpentine_period, val);
+  else if(param == "explore_pt") {
+    string xstr = biteStringX(val, ',');
+    if(!isNumber(xstr) || !isNumber(val)) return false;
+    if(!m_explore_pts_from_config) {
+      m_explore_pts.clear();
+      m_explore_pts_from_config = true;
+    }
+    m_explore_pts.push_back(XYPoint(atof(xstr.c_str()), atof(val.c_str())));
+    return true;
+  }
+  else if(param == "points")
+    return true; // pGenRescue sends waypoint updates; BHV_Pinky handles its own targeting
+  else if(param == "op_region") {
+    XYPolygon poly = string2Poly(val);
+    if(poly.size() < 3) return false;
+    m_op_region     = poly;
+    m_op_region_set = true;
+    if(!m_explore_pts_from_config)
+      buildExploreGrid();
+    return true;
+  }
 
   return false;
 }
@@ -103,8 +136,11 @@ IvPFunction* BHV_Pinky::onRunState()
   if(m_pt_set) {
     double dist = hypot(m_ptx - m_osx, m_pty - m_osy);
     if(dist <= m_capture_radius) {
-      // Locally mark rescued; FOUND_SWIMMER from shore will confirm
-      if(!m_target_id.empty()) {
+      if(m_explore_mode) {
+        m_visited_regions.insert(m_explore_idx);
+        m_explore_mode = false;
+      } else if(!m_target_id.empty()) {
+        // Locally mark rescued; FOUND_SWIMMER from shore will confirm
         m_rescued_ids.insert(m_target_id);
         m_swimmers.erase(m_target_id);
       }
@@ -113,8 +149,18 @@ IvPFunction* BHV_Pinky::onRunState()
     }
   }
 
-  if(!m_pt_set)
-    selectTarget();
+  // Swimmer appeared while exploring — switch to rescue immediately
+  if(m_explore_mode && !m_swimmers.empty()) {
+    m_pt_set = false;
+    m_explore_mode = false;
+  }
+
+  if(!m_pt_set) {
+    if(!m_swimmers.empty())
+      selectTarget();
+    else
+      selectExploreTarget();
+  }
 
   if(!m_pt_set) {
     postWMessage("No swimmer targets known yet");
@@ -191,6 +237,69 @@ void BHV_Pinky::selectTarget()
 }
 
 //-----------------------------------------------------------
+// Procedure: buildExploreGrid
+//   Generates a grid of exploration waypoints inside the op
+//   region polygon. Called once when op_region is set.
+
+void BHV_Pinky::buildExploreGrid()
+{
+  m_explore_pts.clear();
+  if(!m_op_region_set) return;
+
+  double xmin = m_op_region.get_min_x();
+  double xmax = m_op_region.get_max_x();
+  double ymin = m_op_region.get_min_y();
+  double ymax = m_op_region.get_max_y();
+
+  double spacing = 30.0;
+  for(double x = xmin + spacing/2; x < xmax; x += spacing) {
+    for(double y = ymin + spacing/2; y < ymax; y += spacing) {
+      if(m_op_region.contains(x, y))
+        m_explore_pts.push_back(XYPoint(x, y));
+    }
+  }
+}
+
+//-----------------------------------------------------------
+// Procedure: selectExploreTarget
+//   When no swimmers are known, navigate to the nearest
+//   unvisited exploration point. Resets visited set once all
+//   points have been covered so exploration continues.
+
+void BHV_Pinky::selectExploreTarget()
+{
+  if(m_explore_pts.empty())
+    return;
+
+  // Reset if all regions have been visited
+  if(m_visited_regions.size() >= m_explore_pts.size())
+    m_visited_regions.clear();
+
+  double best_dist = 1e9;
+  int    best_idx  = -1;
+  for(int i = 0; i < (int)m_explore_pts.size(); i++) {
+    if(m_visited_regions.count(i))
+      continue;
+    double dist = hypot(m_explore_pts[i].x() - m_osx,
+                        m_explore_pts[i].y() - m_osy);
+    if(dist < best_dist) {
+      best_dist = dist;
+      best_idx  = i;
+    }
+  }
+
+  if(best_idx == -1)
+    return;
+
+  m_ptx         = m_explore_pts[best_idx].x();
+  m_pty         = m_explore_pts[best_idx].y();
+  m_pt_set      = true;
+  m_explore_mode = true;
+  m_explore_idx  = best_idx;
+  m_target_id   = "";
+}
+
+//-----------------------------------------------------------
 // Procedure: buildFunction
 
 IvPFunction* BHV_Pinky::buildFunction()
@@ -209,8 +318,12 @@ IvPFunction* BHV_Pinky::buildFunction()
   }
 
   double rel_ang = relAng(m_osx, m_osy, m_ptx, m_pty);
+  double curr_time = getBufferCurrTime();
+  double serp_offset = m_serpentine_amp * sin(2.0 * M_PI * curr_time / m_serpentine_period);
+  double heading = fmod(rel_ang + serp_offset + 360.0, 360.0);
+
   ZAIC_PEAK crs_zaic(m_domain, "course");
-  crs_zaic.setSummit(rel_ang);
+  crs_zaic.setSummit(heading);
   crs_zaic.setPeakWidth(0);
   crs_zaic.setBaseWidth(180.0);
   crs_zaic.setSummitDelta(0);

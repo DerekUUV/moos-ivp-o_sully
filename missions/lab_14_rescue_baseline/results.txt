@@ -25,3 +25,12 @@
   score1=9, score2=6, dur=180, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[VICE-IMAC], mhash_lshort=Z-VICE-IMAC, mhash=mhash=260428-1100Z-VICE-IMAC,utc=1777388415.63
       score1=8, score2=7, dur=147.4, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[FINE-CODE], mhash_lshort=Q-FINE-CODE, mhash=mhash=260430-0949Q-FINE-CODE,utc=1777556985.91
   score1=8, score2=7, dur=149.9, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[DANK-RUSS], mhash_lshort=T-DANK-RUSS, mhash=mhash=260430-0951T-DANK-RUSS,utc=1777557073.86
+  score1=0, score2=0, dur=950.1, team1=ben, team2=abe, winner=ben, mtype=rescue_r2, mhash_short=[GREY-INDY], mhash_lshort=U-GREY-INDY, mhash=mhash=260430-1103U-GREY-INDY,utc=1777561410.69
+        score1=5, score2=0, dur=147.8, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[BACK-RAFT], mhash_lshort=U-BACK-RAFT, mhash=mhash=260430-1114U-BACK-RAFT,utc=1777562070.91
+  score1=22, score2=0, dur=391.4, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[PLUS-CASE], mhash_lshort=W-PLUS-CASE, mhash=mhash=260430-1117W-PLUS-CASE,utc=1777562262.59
+      score1=30, score2=0, dur=563.6, team1=abe, team2=ben, winner=abe, mtype=rescue_r2, mhash_short=[SAFE-HAIR], mhash_lshort=Y-SAFE-HAIR, mhash=mhash=260430-1125Y-SAFE-HAIR,utc=1777562745.81
+  score1=20, score2=0, dur=392.8, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[EVIL-COST], mhash_lshort=J-EVIL-COST, mhash=mhash=260512-0938J-EVIL-COST,utc=1778593133.80
+  score1=20, score2=0, dur=393.6, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[WAXY-ACHE], mhash_lshort=F-WAXY-ACHE, mhash=mhash=260512-0942F-WAXY-ACHE,utc=1778593355.21
+  score1=20, score2=0, dur=389.1, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[SURE-CORY], mhash_lshort=U-SURE-CORY, mhash=mhash=260512-0944U-SURE-CORY,utc=1778593454.59
+    score1=8, score2=0, dur=950.1, team1=abe, team2=unknown, winner=abe, mtype=rescue_r2, mhash_short=[TINY-FIGS], mhash_lshort=Z-TINY-FIGS, mhash=mhash=260512-0950Z-TINY-FIGS,utc=1778593820.35
+  
